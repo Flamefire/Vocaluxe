@@ -637,7 +637,8 @@ namespace Vocaluxe.Menu
     public enum EPlaybackLib
     {
         PortAudio,
-        OpenAL
+        OpenAL,
+        BASS
     }
 
     public enum EWebcamLib
@@ -651,7 +652,8 @@ namespace Vocaluxe.Menu
 #if WIN
         DirectSound,
 #endif
-        PortAudio
+        PortAudio,
+        BASS
     }
 
     public enum EVideoDecoder

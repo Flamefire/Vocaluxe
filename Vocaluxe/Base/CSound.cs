@@ -31,6 +31,10 @@ namespace Vocaluxe.Base
                     _Playback = new COpenALPlay();
                     break;
 
+                case EPlaybackLib.BASS:
+                    _Playback = new CBassPlay();
+                    break;
+
                 default:
                     _Playback = new CPortAudioPlay();
                     break;
@@ -192,6 +196,10 @@ namespace Vocaluxe.Base
                     _Record = new CDirectSoundRecord();
                     break;
 #endif
+
+                case ERecordLib.BASS:
+                    _Record = new CBassRecord();
+                    break;
 
                 default:
                     _Record = new CPortAudioRecord();

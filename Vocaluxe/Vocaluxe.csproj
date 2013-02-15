@@ -13,6 +13,9 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <StartupObject>Vocaluxe.MainProgram</StartupObject>
+    <ApplicationIcon>Vocaluxe.ico</ApplicationIcon>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -27,9 +30,6 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <StartupObject>Vocaluxe.MainProgram</StartupObject>
-    <ApplicationIcon>Vocaluxe.ico</ApplicationIcon>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DebugWin|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -120,7 +120,12 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup Condition="'$(Platform)' == 'x86' And ('$(Configuration)' == 'DebugWin' Or '$(Configuration)' == 'ReleaseWin')">
-    <Reference Include="SlimDX">
+    <Reference Include="Bass.Net">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Output\x86\Bass.Net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+     <Reference Include="SlimDX">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Output\x86\SlimDX.dll</HintPath>
       <Private>False</Private>
@@ -131,7 +136,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup Condition="'$(Platform)' == 'x64' And ('$(Configuration)' == 'DebugWin' Or '$(Configuration)' == 'ReleaseWin')">
-    <Reference Include="SlimDX">
+    <Reference Include="Bass.Net">
+      <HintPath>..\Output\x64\Bass.Net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+     <Reference Include="SlimDX">
       <HintPath>..\Output\x64\SlimDX.dll</HintPath>
       <Private>False</Private>
     </Reference>
@@ -139,6 +148,9 @@
       <HintPath>..\Output\x64\System.Data.SQLite.dll</HintPath>
       <Private>False</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'DebugLinux' Or '$(Configuration)' == 'ReleaseLinux'">
+    <Reference Include="Mono.Data.Sqlite" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AForge.Video, Version=2.2.4.0, Culture=neutral, PublicKeyToken=cbfb6e07d173c401, processorArchitecture=MSIL">
@@ -209,6 +221,8 @@
     <Compile Include="Lib\Input\WiiMote\WiiMoteLib.cs" />
     <Compile Include="Lib\Playlist\CPlaylistFile.cs" />
     <Compile Include="Lib\Sound\CDirectSoundRecord.cs" />
+    <Compile Include="Lib\Sound\CBassPlay.cs" />
+    <Compile Include="Lib\Sound\CBassRecord.cs" />
     <Compile Include="Lib\Sound\COpenALPlay.cs" />
     <Compile Include="Lib\Sound\COpenALRecord.cs" />
     <Compile Include="Base\CSound.cs" />
