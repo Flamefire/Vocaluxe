@@ -28,3 +28,5 @@ Output/Songs
 /Vocaluxe/Vocaluxe.csproj.user
 
 /Output/Config.xml
+
+/ipch/gstreamerhelper-2e5d76e8/*.ipch

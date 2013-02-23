@@ -15,8 +15,14 @@ namespace Vocaluxe.Lib.Sound
 {
     class CBassPlay : IPlayback
     {
+        private class CVolumes
+        {
+            public float Volume = 50f;
+            public float VolumeMax = 100f;
+        }
         private bool _Initialized = false;
         private List<AudioStreams> _Streams;
+        private List<CVolumes> _Volumes;
         private SYNCPROC _SyncSlideAndStop;
         private SYNCPROC _SyncSlideAndPause;
         private Object MutexAudioStreams = new Object();
@@ -49,6 +55,7 @@ namespace Vocaluxe.Lib.Sound
             {
                 ok = Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero);
                 _Streams = new List<AudioStreams>();
+                _Volumes = new List<CVolumes>();
                 _SyncSlideAndStop = new SYNCPROC(EndSync);
                 _SyncSlideAndPause = new SYNCPROC(PauseSync);
             }
@@ -71,6 +78,7 @@ namespace Vocaluxe.Lib.Sound
             lock (MutexAudioStreams)
             {
                 _Streams.Clear();
+                _Volumes.Clear();
             }
         }
 
@@ -121,6 +129,7 @@ namespace Vocaluxe.Lib.Sound
                 lock (MutexAudioStreams)
                 {
                     _Streams.Add(stream);
+                    _Volumes.Add(new CVolumes());
                 }
 
                 return stream.handle;
@@ -137,6 +146,7 @@ namespace Vocaluxe.Lib.Sound
                     if (AlreadyAdded(Stream))
                     {
                         Bass.BASS_StreamFree(Stream);
+                        _Volumes.RemoveAt(GetStreamIndex(Stream));
                         _Streams.RemoveAt(GetStreamIndex(Stream));
                     }
                 }
@@ -215,7 +225,8 @@ namespace Vocaluxe.Lib.Sound
                 {
                     if (AlreadyAdded(Stream))
                     {
-                        Bass.BASS_ChannelSlideAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, TargetVolume / 100f, (int)Math.Round(Seconds * 1000f));
+                        float maxVol = _Volumes[GetStreamIndex(Stream)].VolumeMax;
+                        Bass.BASS_ChannelSlideAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, TargetVolume * maxVol / 100f, (int)Math.Round(Seconds * 1000f));
                     }
                 }
 
@@ -230,7 +241,8 @@ namespace Vocaluxe.Lib.Sound
                 {
                     if (AlreadyAdded(Stream))
                     {
-                        Bass.BASS_ChannelSlideAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, TargetVolume / 100f, (int)Math.Round(Seconds * 1000f));
+                        float maxVol = _Volumes[GetStreamIndex(Stream)].VolumeMax;
+                        Bass.BASS_ChannelSlideAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, TargetVolume * maxVol / 100f, (int)Math.Round(Seconds * 1000f));
                         Bass.BASS_ChannelSetSync(Stream, BASSSync.BASS_SYNC_SLIDE, 0L, _SyncSlideAndPause, IntPtr.Zero);
                     }
                 }
@@ -246,7 +258,8 @@ namespace Vocaluxe.Lib.Sound
                 {
                     if (AlreadyAdded(Stream))
                     {
-                        Bass.BASS_ChannelSlideAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, TargetVolume / 100f, (int)Math.Round(Seconds * 1000f));
+                        float maxVol = _Volumes[GetStreamIndex(Stream)].VolumeMax;
+                        Bass.BASS_ChannelSlideAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, TargetVolume * maxVol / 100f, (int)Math.Round(Seconds * 1000f));
                         Bass.BASS_ChannelSetSync(Stream, BASSSync.BASS_SYNC_SLIDE, 0L, _SyncSlideAndStop, IntPtr.Zero);
                     }
                 }
@@ -262,7 +275,9 @@ namespace Vocaluxe.Lib.Sound
                 {
                     if (AlreadyAdded(Stream))
                     {
-                        Bass.BASS_ChannelSetAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, Volume / 100f);
+                        float maxVol = _Volumes[GetStreamIndex(Stream)].VolumeMax;
+                        _Volumes[GetStreamIndex(Stream)].Volume = Volume / 100f;
+                        Bass.BASS_ChannelSetAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, Volume * maxVol / 100f);
                     }
                 }
 
@@ -277,7 +292,9 @@ namespace Vocaluxe.Lib.Sound
                 {
                     if (AlreadyAdded(Stream))
                     {
-                        Bass.BASS_ChannelSetAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, Volume / 100f);
+                        float Vol = _Volumes[GetStreamIndex(Stream)].Volume;
+                        _Volumes[GetStreamIndex(Stream)].VolumeMax = Volume / 100f;
+                        Bass.BASS_ChannelSetAttribute(Stream, BASSAttribute.BASS_ATTRIB_VOL, Volume * Vol / 100f);
                     }
                 }
 
@@ -430,32 +447,12 @@ namespace Vocaluxe.Lib.Sound
 
         private void ReadRegistrationFile(string FileName, ref string Email, ref string Code)
         {
-            #region Inits
-            bool loaded = false;
-            XPathDocument xPathDoc = null;
-            XPathNavigator navigator = null;
+            CXMLReader xmlReader = CXMLReader.OpenFile(FileName);
 
-            try
+            if (xmlReader != null)
             {
-                xPathDoc = new XPathDocument(FileName);
-                navigator = xPathDoc.CreateNavigator();
-                loaded = true;
-            }
-            catch (Exception)
-            {
-                loaded = false;
-                if (navigator != null)
-                    navigator = null;
-
-                if (xPathDoc != null)
-                    xPathDoc = null;
-            }
-            #endregion Inits
-
-            if (loaded)
-            {
-                CHelper.GetValueFromXML("//root/Registration/EMail", navigator, ref Email, String.Empty);
-                CHelper.GetValueFromXML("//root/Registration/Code", navigator, ref Code, String.Empty);
+                xmlReader.GetValue("//root/Registration/EMail", ref Email, String.Empty);
+                xmlReader.GetValue("//root/Registration/Code", ref Code, String.Empty);
             }
         }
 
