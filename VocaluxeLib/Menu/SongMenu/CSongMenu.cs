@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
-using System.Xml.XPath;
 
 using Vocaluxe.Menu;
 using Vocaluxe.PartyModes;
@@ -12,21 +11,19 @@ namespace Vocaluxe.Menu.SongMenu
     public class CSongMenu : ISongMenu
     {
         private int _PartyModeID;
-        private Basic _Base;
 
         private ISongMenu _SongMenu;
         private ESongMenu _Type;
 
-        public CSongMenu(Basic Base, int PartyModeID)
+        public CSongMenu(int PartyModeID)
         {
             _PartyModeID = PartyModeID;
-            _Base = Base;
             CreateSongMenu();
         }
 
         public void UpdateSongMenuType()
         {
-            if (_Type != _Base.Config.GetSongMenuType())
+            if (_Type != CBase.Config.GetSongMenuType())
                 CreateSongMenu();
         }
 
@@ -166,9 +163,9 @@ namespace Vocaluxe.Menu.SongMenu
             return _SongMenu.GetThemeName();
         }
 
-        public bool LoadTheme(string XmlPath, string ElementName, XPathNavigator navigator, int SkinIndex)
+        public bool LoadTheme(string XmlPath, string ElementName, CXMLReader xmlReader, int SkinIndex)
         {
-            return _SongMenu.LoadTheme(XmlPath, ElementName, navigator, SkinIndex);
+            return _SongMenu.LoadTheme(XmlPath, ElementName, xmlReader, SkinIndex);
         }
 
         public bool SaveTheme(XmlWriter writer)
@@ -209,7 +206,7 @@ namespace Vocaluxe.Menu.SongMenu
                 _SongMenu.OnHide();
             }
 
-            switch (_Base.Config.GetSongMenuType())
+            switch (CBase.Config.GetSongMenuType())
             {
                 //case ESongMenu.TR_CONFIG_LIST:
                 //    _SongMenu = new CSongMenuList();
@@ -220,7 +217,7 @@ namespace Vocaluxe.Menu.SongMenu
                 //    break;
 
                 case ESongMenu.TR_CONFIG_TILE_BOARD:
-                    _SongMenu = new CSongMenuTileBoard(_Base, _PartyModeID);
+                    _SongMenu = new CSongMenuTileBoard(_PartyModeID);
                     break;
 
                 //case ESongMenu.TR_CONFIG_BOOK:
@@ -228,7 +225,7 @@ namespace Vocaluxe.Menu.SongMenu
                 //    break;
             }
 
-            _Type = _Base.Config.GetSongMenuType();
+            _Type = CBase.Config.GetSongMenuType();
         }
     }
 }

@@ -117,7 +117,7 @@ namespace Vocaluxe.PartyModes
             }
             catch (Exception e)
             {
-                _Base.Log.LogError("Error in party mode screen TicTacToe main. Can't cast received data from game mode " + _ThemeName + ". " + e.Message); ;
+                CBase.Log.LogError("Error in party mode screen TicTacToe main. Can't cast received data from game mode " + _ThemeName + ". " + e.Message); ;
             }
 
         }
@@ -335,13 +335,13 @@ namespace Vocaluxe.PartyModes
                 Texts[htTexts(TextTeamChoosing)].Visible = false;
                 if (Winner > 0)
                 {
-                    Texts[htTexts(TextFinishMessage)].Color = _Base.Theme.GetPlayerColor(Winner);
-                    Texts[htTexts(TextFinishMessage)].Text = _Base.Language.Translate("TR_SCREENMAIN_WINNER", _PartyModeID) + " " + _Base.Language.Translate("TR_TEAM", _PartyModeID) + " " + Winner;
+                    Texts[htTexts(TextFinishMessage)].Color = CBase.Theme.GetPlayerColor(Winner);
+                    Texts[htTexts(TextFinishMessage)].Text = CBase.Language.Translate("TR_SCREENMAIN_WINNER", _PartyModeID) + " " + CBase.Language.Translate("TR_TEAM", _PartyModeID) + " " + Winner;
                 }
                 else
                 {
                     Texts[htTexts(TextFinishMessage)].Color = new SColorF(1, 1, 1, 1);
-                    Texts[htTexts(TextFinishMessage)].Text = _Base.Language.Translate("TR_SCREENMAIN_NOWINNER", _PartyModeID);
+                    Texts[htTexts(TextFinishMessage)].Text = CBase.Language.Translate("TR_SCREENMAIN_NOWINNER", _PartyModeID);
                 }
                 SetInteractionToButton(Buttons[htButtons(ButtonExit)]);
             }
@@ -363,8 +363,8 @@ namespace Vocaluxe.PartyModes
         public override void OnClose()
         {
             base.OnClose();
-            _Base.BackgroundMusic.SetStatus(false);
-            _Base.Sound.FadeAndStop(PreviewStream, 0f, 0.5f);
+            CBase.BackgroundMusic.SetStatus(false);
+            CBase.Sound.FadeAndStop(PreviewStream, 0f, 0.5f);
         }
 
         private void CreateFields()
@@ -383,14 +383,14 @@ namespace Vocaluxe.PartyModes
         private void UpdateFields()
         {
             int NumOneRow = (int)Math.Sqrt((double)GameData.NumFields);
-            float FieldSizeY = (_Base.Settings.GetRenderH() - 150 - NumOneRow * FieldSpace) / NumOneRow;
-            float FieldSizeX = (_Base.Settings.GetRenderW() - 300 - NumOneRow * FieldSpace) / NumOneRow;
+            float FieldSizeY = (CBase.Settings.GetRenderH() - 150 - NumOneRow * FieldSpace) / NumOneRow;
+            float FieldSizeX = (CBase.Settings.GetRenderW() - 300 - NumOneRow * FieldSpace) / NumOneRow;
             if (FieldSizeX < FieldSizeY)
                 FieldSize = FieldSizeX;
             else
                 FieldSize = FieldSizeY;
-            FieldFirstX = _Base.Settings.GetRenderW() / 2 - (NumOneRow * FieldSize + (NumOneRow - 1) * FieldSpace) / 2;
-            FieldFirstY = 140 + (_Base.Settings.GetRenderH() - 140) / 2 - (NumOneRow * FieldSize + NumOneRow * FieldSpace) / 2;
+            FieldFirstX = CBase.Settings.GetRenderW() / 2 - (NumOneRow * FieldSize + (NumOneRow - 1) * FieldSpace) / 2;
+            FieldFirstY = 140 + (CBase.Settings.GetRenderH() - 140) / 2 - (NumOneRow * FieldSize + NumOneRow * FieldSpace) / 2;
             int row = 0;
             int column = 0;
             float x = FieldFirstX;
@@ -436,20 +436,20 @@ namespace Vocaluxe.PartyModes
                 if (Fields[i].Content.Finished)
                 {
                     Fields[i].Button.Enabled = false;
-                    Fields[i].Button.Texture = _Base.Songs.GetSongByID(Fields[i].Content.SongID).CoverTextureBig;
-                    Fields[i].Button.Color = _Base.Theme.GetPlayerColor(Fields[i].Content.Winner);
-                    Fields[i].Button.SColor = _Base.Theme.GetPlayerColor(Fields[i].Content.Winner);
+                    Fields[i].Button.Texture = CBase.Songs.GetSongByID(Fields[i].Content.SongID).CoverTextureBig;
+                    Fields[i].Button.Color = CBase.Theme.GetPlayerColor(Fields[i].Content.Winner);
+                    Fields[i].Button.SColor = CBase.Theme.GetPlayerColor(Fields[i].Content.Winner);
                 }
                 if (Status == EStatus.FieldSelected && SelectedField == i)
                 {
-                    Fields[i].Button.Texture = _Base.Songs.GetSongByID(Fields[i].Content.SongID).CoverTextureBig;
+                    Fields[i].Button.Texture = CBase.Songs.GetSongByID(Fields[i].Content.SongID).CoverTextureBig;
                     Fields[i].Button.Color = new SColorF(1, 1, 1, 1);
                     Fields[i].Button.SColor = new SColorF(1, 1, 1, 1);
                     Fields[i].Button.Enabled = false;
                 }
                 if (Status == EStatus.JokerRetry && Fields[i].Content.Finished)
                 {
-                    Fields[i].Button.SColor = _Base.Theme.GetPlayerColor(GameData.Team+1);
+                    Fields[i].Button.SColor = CBase.Theme.GetPlayerColor(GameData.Team+1);
                     Fields[i].Button.Enabled = true;
                 }
                 if (Status == EStatus.JokerRetry && !Fields[i].Content.Finished)
@@ -484,15 +484,15 @@ namespace Vocaluxe.PartyModes
                 SingerTeam2 = GameData.PlayerTeam2[0];
                 GameData.PlayerTeam2.RemoveAt(0);
             }
-            Menu.SongMenu.CSong Song = _Base.Songs.GetSongByID(SongID);
+            Menu.SongMenu.CSong Song = CBase.Songs.GetSongByID(SongID);
 
-            _Base.BackgroundMusic.SetStatus(true);
+            CBase.BackgroundMusic.SetStatus(true);
 
-            PreviewStream = _Base.Sound.Load(Song.GetMP3(), false);
-            _Base.Sound.SetPosition(PreviewStream, Song.PreviewStart);
-            _Base.Sound.SetStreamVolume(PreviewStream, 0f);
-            _Base.Sound.Play(PreviewStream);
-            _Base.Sound.Fade(PreviewStream, _Base.Config.GetBackgroundMusicVolume(), 1f);
+            PreviewStream = CBase.Sound.Load(Song.GetMP3(), false);
+            CBase.Sound.SetPosition(PreviewStream, Song.PreviewStart);
+            CBase.Sound.SetStreamVolume(PreviewStream, 0f);
+            CBase.Sound.Play(PreviewStream);
+            CBase.Sound.Fade(PreviewStream, CBase.Config.GetBackgroundMusicVolume(), 1f);
             Status = EStatus.FieldSelected;
             Fields[SelectedField].Content.SongID = SongID;
             GameData.Rounds[SelectedField].SongID = SongID;
@@ -504,7 +504,7 @@ namespace Vocaluxe.PartyModes
             Texts[htTexts(TextNextPlayerT2)].Visible = true;
             Texts[htTexts(TextNextPlayerNameT1)].Visible = true;
             Texts[htTexts(TextNextPlayerNameT2)].Visible = true;
-            SProfile[] profiles =  _Base.Profiles.GetProfiles();
+            SProfile[] profiles =  CBase.Profiles.GetProfiles();
             Texts[htTexts(TextNextPlayerNameT1)].Text = profiles[GameData.ProfileIDsTeam1[GameData.Rounds[SelectedField].SingerTeam1]].PlayerName;
             Texts[htTexts(TextNextPlayerNameT2)].Text = profiles[GameData.ProfileIDsTeam2[GameData.Rounds[SelectedField].SingerTeam2]].PlayerName;
             Statics[htStatics(StaticAvatarT1)].Visible = true;
@@ -524,14 +524,14 @@ namespace Vocaluxe.PartyModes
         private void FieldSelectedAgain()
         {
             int SongID = Fields[SelectedField].Content.SongID;
-            Menu.SongMenu.CSong Song = _Base.Songs.GetSongByID(SongID);
-            _Base.BackgroundMusic.SetStatus(true);
+            Menu.SongMenu.CSong Song = CBase.Songs.GetSongByID(SongID);
+            CBase.BackgroundMusic.SetStatus(true);
 
-            PreviewStream = _Base.Sound.Load(Song.GetMP3(), false);
-            _Base.Sound.SetPosition(PreviewStream, Song.PreviewStart);
-            _Base.Sound.SetStreamVolume(PreviewStream, 0f);
-            _Base.Sound.Play(PreviewStream);
-            _Base.Sound.Fade(PreviewStream, _Base.Config.GetBackgroundMusicVolume(), 1f);
+            PreviewStream = CBase.Sound.Load(Song.GetMP3(), false);
+            CBase.Sound.SetPosition(PreviewStream, Song.PreviewStart);
+            CBase.Sound.SetStreamVolume(PreviewStream, 0f);
+            CBase.Sound.Play(PreviewStream);
+            CBase.Sound.Fade(PreviewStream, CBase.Config.GetBackgroundMusicVolume(), 1f);
             Status = EStatus.FieldSelected;
             Fields[SelectedField].Content.SongID = SongID;
             GameData.Rounds[SelectedField].SongID = SongID;
@@ -543,7 +543,7 @@ namespace Vocaluxe.PartyModes
             Texts[htTexts(TextNextPlayerT2)].Visible = true;
             Texts[htTexts(TextNextPlayerNameT1)].Visible = true;
             Texts[htTexts(TextNextPlayerNameT2)].Visible = true;
-            SProfile[] profiles = _Base.Profiles.GetProfiles();
+            SProfile[] profiles = CBase.Profiles.GetProfiles();
             Texts[htTexts(TextNextPlayerNameT1)].Text = profiles[GameData.ProfileIDsTeam1[GameData.Rounds[SelectedField].SingerTeam1]].PlayerName;
             Texts[htTexts(TextNextPlayerNameT2)].Text = profiles[GameData.ProfileIDsTeam2[GameData.Rounds[SelectedField].SingerTeam2]].PlayerName;
             Statics[htStatics(StaticAvatarT1)].Visible = true;
@@ -569,8 +569,8 @@ namespace Vocaluxe.PartyModes
                     if (GameData.NumJokerRandom[TeamNr] > 0)
                     {
                         GameData.NumJokerRandom[TeamNr]--;
-                        if (!_Base.Sound.IsFinished(PreviewStream))
-                            _Base.Sound.FadeAndStop(PreviewStream, 0, 1);
+                        if (!CBase.Sound.IsFinished(PreviewStream))
+                            CBase.Sound.FadeAndStop(PreviewStream, 0, 1);
                         FieldSelected();
                     }
                     break;
@@ -581,8 +581,8 @@ namespace Vocaluxe.PartyModes
                     {
                         GameData.NumJokerRetry[TeamNr]--;
                         GameData.Team = TeamNr;
-                        if (!_Base.Sound.IsFinished(PreviewStream))
-                            _Base.Sound.FadeAndStop(PreviewStream, 0, 1);
+                        if (!CBase.Sound.IsFinished(PreviewStream))
+                            CBase.Sound.FadeAndStop(PreviewStream, 0, 1);
                         Status = EStatus.JokerRetry;
                         OldSelectedField = SelectedField;
                         SelectedField = -1;
@@ -595,8 +595,8 @@ namespace Vocaluxe.PartyModes
 
         private void UpdateTeamChoosingMessage()
         {
-            Texts[htTexts(TextTeamChoosing)].Color = _Base.Theme.GetPlayerColor(GameData.Team + 1);
-            Texts[htTexts(TextTeamChoosing)].Text = _Base.Language.Translate("TR_TEAM", _PartyModeID) + " " + (GameData.Team + 1) + "! " + _Base.Language.Translate("TR_SCREENMAIN_TEAM_CHOOSE", _PartyModeID);
+            Texts[htTexts(TextTeamChoosing)].Color = CBase.Theme.GetPlayerColor(GameData.Team + 1);
+            Texts[htTexts(TextTeamChoosing)].Text = CBase.Language.Translate("TR_TEAM", _PartyModeID) + " " + (GameData.Team + 1) + "! " + CBase.Language.Translate("TR_SCREENMAIN_TEAM_CHOOSE", _PartyModeID);
             if (Status == EStatus.JokerRetry || Status == EStatus.FieldChoosing)
                 Texts[htTexts(TextTeamChoosing)].Visible = true;
             else
@@ -621,7 +621,7 @@ namespace Vocaluxe.PartyModes
 
         private void NextRound()
         {
-            _Base.Sound.FadeAndStop(PreviewStream, 0f, 0.5f);
+            CBase.Sound.FadeAndStop(PreviewStream, 0f, 0.5f);
             Data.ScreenMain.Rounds = GameData.Rounds;
             Data.ScreenMain.FadeToNameSelection = false;
             Data.ScreenMain.FadeToSinging = true;
@@ -634,7 +634,7 @@ namespace Vocaluxe.PartyModes
 
         private void EndParty()
         {
-            _Base.Sound.FadeAndStop(PreviewStream, 0f, 0.5f);
+            CBase.Sound.FadeAndStop(PreviewStream, 0f, 0.5f);
             FadeTo(EScreens.ScreenParty);
         }
 
@@ -653,7 +653,7 @@ namespace Vocaluxe.PartyModes
 
         private void Back()
         {
-            _Base.Sound.FadeAndStop(PreviewStream, 0f, 0.5f);
+            CBase.Sound.FadeAndStop(PreviewStream, 0f, 0.5f);
             Data.ScreenMain.FadeToNameSelection = true;
             Data.ScreenMain.FadeToSinging = false;
             Data.ScreenMain.SingRoundNr = SelectedField;

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
-using System.Xml;
-using System.Xml.XPath;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace Vocaluxe.Menu
 {
@@ -26,14 +25,12 @@ namespace Vocaluxe.Menu
     {
         class CTile
         {
-            private Basic _Base;
             public int PlayerNr;
             public CStatic Avatar;
             public CText Name;
 
-            public CTile(Basic Base)
+            public CTile()
             {
-                _Base = Base;
             }
 
             public CTile(CStatic av, CText tex, int pl)
@@ -45,7 +42,6 @@ namespace Vocaluxe.Menu
         }
 
         private int _PartyModeID;
-        private Basic _Base;
         private SThemeNameSelection _Theme;
         private bool _ThemeLoaded;
 
@@ -85,10 +81,9 @@ namespace Vocaluxe.Menu
         private CStatic PlayerSelector;
 
 
-        public CNameSelection(Basic Base, int PartyModeID)
+        public CNameSelection(int PartyModeID)
         {
             _PartyModeID = PartyModeID;
-            _Base = Base;
             _Theme = new SThemeNameSelection();
 
             _Tiles = new List<CTile>();
@@ -99,7 +94,7 @@ namespace Vocaluxe.Menu
         {
             PrepareTiles();
 
-            PlayerSelector = new CStatic(_Base, _PartyModeID);
+            PlayerSelector = new CStatic(_PartyModeID);
             PlayerSelector.Texture = _TextureTileSelected;
             PlayerSelector.Rect = new SRectF(0, 0, (_TileW + 6), (_TileH + 6), (Rect.Z - 0.5f));
             PlayerSelector.Visible = false;
@@ -109,54 +104,54 @@ namespace Vocaluxe.Menu
             UpdateList(0);
         }
 
-        public bool LoadTheme(string XmlPath, string ElementName, XPathNavigator navigator, int SkinIndex)
+        public bool LoadTheme(string XmlPath, string ElementName, CXMLReader xmlReader, int SkinIndex)
         {
             string item = XmlPath + "/" + ElementName;
             _ThemeLoaded = true;
 
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/X", navigator, ref Rect.X);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Y", navigator, ref Rect.Y);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Z", navigator, ref Rect.Z);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/W", navigator, ref Rect.W);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/H", navigator, ref Rect.H);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/X", ref Rect.X);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Y", ref Rect.Y);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Z", ref Rect.Z);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/W", ref Rect.W);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/H", ref Rect.H);
 
-            _ThemeLoaded &= CHelper.GetValueFromXML(item + "/SkinEmptyTile", navigator, ref _Theme.TextureEmptyTileName, String.Empty);
+            _ThemeLoaded &= xmlReader.GetValue(item + "/SkinEmptyTile", ref _Theme.TextureEmptyTileName, String.Empty);
 
-            if (CHelper.GetValueFromXML(item + "/ColorEmptyTile", navigator, ref _Theme.ColorEmptyTileName, String.Empty))
+            if (xmlReader.GetValue(item + "/ColorEmptyTile", ref _Theme.ColorEmptyTileName, String.Empty))
             {
-                _ThemeLoaded &= _Base.Theme.GetColor(_Theme.ColorEmptyTileName, SkinIndex, ref ColorEmptyTile);
+                _ThemeLoaded &= CBase.Theme.GetColor(_Theme.ColorEmptyTileName, SkinIndex, ref ColorEmptyTile);
             }
             else
             {
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/R", navigator, ref ColorEmptyTile.R);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/G", navigator, ref ColorEmptyTile.G);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/B", navigator, ref ColorEmptyTile.B);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/A", navigator, ref ColorEmptyTile.A);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/R", ref ColorEmptyTile.R);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/G", ref ColorEmptyTile.G);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/B", ref ColorEmptyTile.B);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/A", ref ColorEmptyTile.A);
             }
 
-            _ThemeLoaded &= CHelper.GetValueFromXML(item + "/SkinTileSelected", navigator, ref _Theme.TextureTileSelectedName, String.Empty);
+            _ThemeLoaded &= xmlReader.GetValue(item + "/SkinTileSelected", ref _Theme.TextureTileSelectedName, String.Empty);
 
-            _ThemeLoaded &= CHelper.TryGetIntValueFromXML(item + "/Tiles/W", navigator, ref _TileW);
-            _ThemeLoaded &= CHelper.TryGetIntValueFromXML(item + "/Tiles/H", navigator, ref _TileH);
-            _ThemeLoaded &= CHelper.TryGetIntValueFromXML(item + "/Tiles/NumW", navigator, ref _NumW);
-            _ThemeLoaded &= CHelper.TryGetIntValueFromXML(item + "/Tiles/NumH", navigator, ref _NumH);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Tiles/SpaceW", navigator, ref _SpaceW);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Tiles/SpaceH", navigator, ref _SpaceH);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Tiles/Name/Space", navigator, ref _Theme.NameSpace);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Tiles/Name/H", navigator, ref _Theme.NameHeight);
-            _ThemeLoaded &= CHelper.GetValueFromXML(item + "/Tiles/Name/Font", navigator, ref _Theme.NameFont, "Normal");
-            _ThemeLoaded &= CHelper.TryGetEnumValueFromXML<EStyle>(item + "/Tiles/Name/Style", navigator, ref _Theme.NameStyle);
-            if (CHelper.GetValueFromXML(item + "/Tiles/Name/Color", navigator, ref _Theme.NameColorName, String.Empty))
+            _ThemeLoaded &= xmlReader.TryGetIntValue(item + "/Tiles/W", ref _TileW);
+            _ThemeLoaded &= xmlReader.TryGetIntValue(item + "/Tiles/H", ref _TileH);
+            _ThemeLoaded &= xmlReader.TryGetIntValue(item + "/Tiles/NumW", ref _NumW);
+            _ThemeLoaded &= xmlReader.TryGetIntValue(item + "/Tiles/NumH", ref _NumH);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Tiles/SpaceW", ref _SpaceW);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Tiles/SpaceH", ref _SpaceH);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Tiles/Name/Space", ref _Theme.NameSpace);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Tiles/Name/H", ref _Theme.NameHeight);
+            _ThemeLoaded &= xmlReader.GetValue(item + "/Tiles/Name/Font", ref _Theme.NameFont, "Normal");
+            _ThemeLoaded &= xmlReader.TryGetEnumValue<EStyle>(item + "/Tiles/Name/Style", ref _Theme.NameStyle);
+            if (xmlReader.GetValue(item + "/Tiles/Name/Color", ref _Theme.NameColorName, String.Empty))
             {
-                _ThemeLoaded &= _Base.Theme.GetColor(_Theme.NameColorName, SkinIndex, ref _Theme.NameColor);
+                _ThemeLoaded &= CBase.Theme.GetColor(_Theme.NameColorName, SkinIndex, ref _Theme.NameColor);
             }
             else
             {
-                if (CHelper.TryGetFloatValueFromXML(item + "/Tiles/Name/R", navigator, ref _Theme.NameColor.R))
+                if (xmlReader.TryGetFloatValue(item + "/Tiles/Name/R", ref _Theme.NameColor.R))
                 {
-                    _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Tiles/Name/G", navigator, ref _Theme.NameColor.G);
-                    _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Tiles/Name/B", navigator, ref _Theme.NameColor.B);
-                    _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Tiles/Name/A", navigator, ref _Theme.NameColor.A);
+                    _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Tiles/Name/G", ref _Theme.NameColor.G);
+                    _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Tiles/Name/B", ref _Theme.NameColor.B);
+                    _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Tiles/Name/A", ref _Theme.NameColor.A);
                 }
             }
 
@@ -372,7 +367,7 @@ namespace Vocaluxe.Menu
             if (active && Selection != -1)
             {
                 _player = player;
-                PlayerSelector.Color = _Base.Theme.GetPlayerColor(player);
+                PlayerSelector.Color = CBase.Theme.GetPlayerColor(player);
             }
             //Normal activation
             else if (active)
@@ -380,7 +375,7 @@ namespace Vocaluxe.Menu
                 Selection = 0;
                 _actualSelection = 0;
                 _player = player;
-                PlayerSelector.Color = _Base.Theme.GetPlayerColor(player);
+                PlayerSelector.Color = CBase.Theme.GetPlayerColor(player);
                 PlayerSelector.Visible = true;
             }
             //Deactivate
@@ -415,9 +410,9 @@ namespace Vocaluxe.Menu
             {
                 if ((i + offset * _Tiles.Count) < VisibleProfiles.Count)
                 {
-                    _Tiles[i].Avatar.Texture = _Base.Profiles.GetProfiles()[VisibleProfiles[i + offset * _Tiles.Count]].Avatar.Texture;
+                    _Tiles[i].Avatar.Texture = CBase.Profiles.GetProfiles()[VisibleProfiles[i + offset * _Tiles.Count]].Avatar.Texture;
                     _Tiles[i].Avatar.Color = new SColorF(1, 1, 1, 1);
-                    _Tiles[i].Name.Text = _Base.Profiles.GetProfiles()[VisibleProfiles[i + offset * _Tiles.Count]].PlayerName;
+                    _Tiles[i].Name.Text = CBase.Profiles.GetProfiles()[VisibleProfiles[i + offset * _Tiles.Count]].PlayerName;
                     _Tiles[i].PlayerNr = VisibleProfiles[i + offset * _Tiles.Count];
                 }
                 else
@@ -467,7 +462,7 @@ namespace Vocaluxe.Menu
                 }
             }
 
-            return new CStatic(_Base, _PartyModeID);
+            return new CStatic(_PartyModeID);
         }
 
         public void UnloadTextures()
@@ -476,14 +471,14 @@ namespace Vocaluxe.Menu
 
         public void LoadTextures()
         {
-            _TextureEmptyTile = _Base.Theme.GetSkinTexture(_Theme.TextureEmptyTileName, _PartyModeID);
-            _TextureTileSelected = _Base.Theme.GetSkinTexture(_Theme.TextureTileSelectedName, _PartyModeID);
+            _TextureEmptyTile = CBase.Theme.GetSkinTexture(_Theme.TextureEmptyTileName, _PartyModeID);
+            _TextureTileSelected = CBase.Theme.GetSkinTexture(_Theme.TextureTileSelectedName, _PartyModeID);
 
             if (_Theme.ColorEmptyTileName != String.Empty)
-                ColorEmptyTile = _Base.Theme.GetColor(_Theme.ColorEmptyTileName, _PartyModeID);
+                ColorEmptyTile = CBase.Theme.GetColor(_Theme.ColorEmptyTileName, _PartyModeID);
 
             if (_Theme.NameColorName != String.Empty)
-                _Theme.NameColor = _Base.Theme.GetColor(_Theme.NameColorName, _PartyModeID);
+                _Theme.NameColor = CBase.Theme.GetColor(_Theme.NameColorName, _PartyModeID);
         }
 
         public void ReloadTextures()
@@ -502,8 +497,8 @@ namespace Vocaluxe.Menu
                 for (int j = 0; j < _NumW; j++)
                 {
                     SRectF rect = new SRectF(Rect.X + j * (_TileW + _SpaceW), Rect.Y + i * (_TileH + _SpaceH), _TileW, _TileH, Rect.Z);
-                    CStatic tileStatic = new CStatic(_Base, _PartyModeID, _TextureEmptyTile, ColorEmptyTile, rect);
-                    CText tileText = new CText(_Base, rect.X + rect.W / 2, rect.Y + rect.H + _Theme.NameSpace, rect.Z, _Theme.NameHeight, rect.W, EAlignment.Center, _Theme.NameStyle, _Theme.NameFont, _Theme.NameColor, "");
+                    CStatic tileStatic = new CStatic(_PartyModeID, _TextureEmptyTile, ColorEmptyTile, rect);
+                    CText tileText = new CText(rect.X + rect.W / 2, rect.Y + rect.H + _Theme.NameSpace, rect.Z, _Theme.NameHeight, rect.W, EAlignment.Center, _Theme.NameStyle, _Theme.NameFont, _Theme.NameColor, "");
                     _Tiles.Add(new CTile(tileStatic, tileText, -1));
                 }
             }
@@ -512,18 +507,18 @@ namespace Vocaluxe.Menu
         private void UpdateVisibleProfiles()
         {
             VisibleProfiles.Clear();
-            for (int i = 0; i < _Base.Profiles.GetProfiles().Length; i++)
+            for (int i = 0; i < CBase.Profiles.GetProfiles().Length; i++)
             {
                 bool visible = false;
                 //Show profile only if active
-                if (_Base.Profiles.GetProfiles()[i].Active == EOffOn.TR_CONFIG_ON)
+                if (CBase.Profiles.GetProfiles()[i].Active == EOffOn.TR_CONFIG_ON)
                 {
                     visible = true;
                 }
-                for (int p = 0; p < _Base.Game.GetNumPlayer(); p++)
+                for (int p = 0; p < CBase.Game.GetNumPlayer(); p++)
                 {
                     //Don't show profile if is selected, but if selected and guest
-                    if (_Base.Game.GetPlayer()[p].ProfileID == i && _Base.Profiles.GetProfiles()[i].GuestProfile == EOffOn.TR_CONFIG_OFF)
+                    if (CBase.Game.GetPlayer()[p].ProfileID == i && CBase.Profiles.GetProfiles()[i].GuestProfile == EOffOn.TR_CONFIG_OFF)
                     {
                         visible = false;
                     }

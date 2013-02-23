@@ -39,6 +39,7 @@ namespace Vocaluxe
                 // Init Log
                 CLog.Init();
 
+                CMain.Init();
                 CSettings.CreateFolders();
                 Application.DoEvents();
 

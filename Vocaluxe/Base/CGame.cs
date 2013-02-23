@@ -304,7 +304,8 @@ namespace Vocaluxe.Base
                                     TonePlayer = Tone;
 
                                 _Player[p].NoteDiff = Math.Abs(Tone - TonePlayer);
-                                if (_Player[p].NoteDiff <= (2 - (int)_Player[p].Difficulty))
+                                bool Hit=_Player[p].NoteDiff <= (2 - (int)_Player[p].Difficulty);
+                                if (Hit)
                                 {
                                     // valid
                                     //CSound.RecordSetTone(p, Tone);
@@ -318,8 +319,8 @@ namespace Vocaluxe.Base
                                     if (_Player[p].SingLine[Line].NoteCount > 0)
                                     {
                                         CNote nt = _Player[p].SingLine[Line].LastNote;
-                                        if (notes[Note].StartBeat == beat || nt.EndBeat + 1 != beat || nt.Tone != Tone)
-                                            _Player[p].SingLine[Line].AddNote(new CNote(CMain.Base, beat, 1, Tone, String.Empty, true, notes[Note].NoteType));
+                                        if (notes[Note].StartBeat == beat || nt.EndBeat + 1 != beat || nt.Tone != Tone || !nt.Hit)
+                                            _Player[p].SingLine[Line].AddNote(new CNote(beat, 1, Tone, String.Empty, true, notes[Note].NoteType));
                                         else
                                         {
                                             _Player[p].SingLine[Line].IncLastNoteLength();
@@ -327,7 +328,7 @@ namespace Vocaluxe.Base
                                     }
                                     else
                                     {
-                                        _Player[p].SingLine[Line].AddNote(new CNote(CMain.Base, beat, 1, Tone, String.Empty, true, notes[Note].NoteType));
+                                        _Player[p].SingLine[Line].AddNote(new CNote(beat, 1, Tone, String.Empty, true, notes[Note].NoteType));
                                     }
 
                                     _Player[p].SingLine[Line].LastNote.IsPerfect(notes[Note]);
@@ -338,23 +339,18 @@ namespace Vocaluxe.Base
                                     if (_Player[p].SingLine[Line].NoteCount > 0)
                                     {
                                         CNote nt = _Player[p].SingLine[Line].LastNote;
-                                        if (nt.EndBeat + 1 != beat || nt.Hit)
-                                            _Player[p].SingLine[Line].AddNote(new CNote(CMain.Base, beat, 1, TonePlayer, String.Empty, false, ENoteType.Freestyle));
+                                        if (nt.Tone == TonePlayer && nt.EndBeat + 1 == beat && !nt.Hit)
+                                        {
+                                            _Player[p].SingLine[Line].IncLastNoteLength();
+                                        }
                                         else
                                         {
-                                            if (nt.Tone == TonePlayer && nt.EndBeat + 1 == beat)
-                                            {
-                                                _Player[p].SingLine[Line].IncLastNoteLength();
-                                            }
-                                            else
-                                            {
-                                                _Player[p].SingLine[Line].AddNote(new CNote(CMain.Base, beat, 1, TonePlayer, String.Empty, false, ENoteType.Freestyle));
-                                            }
+                                            _Player[p].SingLine[Line].AddNote(new CNote(beat, 1, TonePlayer, String.Empty, false, ENoteType.Freestyle));
                                         }
                                     }
                                     else
                                     {
-                                        _Player[p].SingLine[Line].AddNote(new CNote(CMain.Base, beat, 1, TonePlayer, String.Empty, false, ENoteType.Freestyle));
+                                        _Player[p].SingLine[Line].AddNote(new CNote(beat, 1, TonePlayer, String.Empty, false, ENoteType.Freestyle));
                                     }
 
                                 }

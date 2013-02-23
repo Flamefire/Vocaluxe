@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
-using System.Xml.XPath;
 
 namespace Vocaluxe.Menu
 {
@@ -20,7 +19,6 @@ namespace Vocaluxe.Menu
 
     public class CButton : IMenuElement
     {
-        private Basic _Base;
         private SThemeButton _Theme;
         private bool _ThemeLoaded;
         private int _PartyModeID;
@@ -73,10 +71,9 @@ namespace Vocaluxe.Menu
             return _Theme.Name;
         }
 
-        public CButton(Basic Base, int PartyModeID)
+        public CButton(int PartyModeID)
         {
             _PartyModeID = PartyModeID;
-            _Base = Base;
             _Theme = new SThemeButton();
             Rect = new SRectF();
             Color = new SColorF();
@@ -85,8 +82,8 @@ namespace Vocaluxe.Menu
             STexture = new STexture(-1);
 
             SelText = false;
-            Text = new CText(_Base, _PartyModeID);
-            SText = new CText(_Base, _PartyModeID);
+            Text = new CText(_PartyModeID);
+            SText = new CText(_PartyModeID);
             Selected = false;
             Visible = true;
             EditMode = false;
@@ -104,7 +101,6 @@ namespace Vocaluxe.Menu
         public CButton(CButton button)
         {
             _PartyModeID = button._PartyModeID;
-            _Base = button._Base;
             _Theme = new SThemeButton();
             _Theme.ColorName = button._Theme.ColorName;
             _Theme.SColorName = button._Theme.SColorName;
@@ -135,69 +131,69 @@ namespace Vocaluxe.Menu
             SReflectionSpace = button.SReflectionSpace;
         }
 
-        public bool LoadTheme(string XmlPath, string ElementName, XPathNavigator navigator, int SkinIndex)
+        public bool LoadTheme(string XmlPath, string ElementName, CXMLReader xmlReader, int SkinIndex)
         {
             string item = XmlPath + "/" + ElementName;
             _ThemeLoaded = true;
 
-            _ThemeLoaded &= CHelper.GetValueFromXML(item + "/Skin", navigator, ref _Theme.TextureName, String.Empty);
-            _ThemeLoaded &= CHelper.GetValueFromXML(item + "/SkinSelected", navigator, ref _Theme.STextureName, String.Empty);
+            _ThemeLoaded &= xmlReader.GetValue(item + "/Skin", ref _Theme.TextureName, String.Empty);
+            _ThemeLoaded &= xmlReader.GetValue(item + "/SkinSelected", ref _Theme.STextureName, String.Empty);
             
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/X", navigator, ref Rect.X);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Y", navigator, ref Rect.Y);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Z", navigator, ref Rect.Z);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/W", navigator, ref Rect.W);
-            _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/H", navigator, ref Rect.H);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/X", ref Rect.X);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Y", ref Rect.Y);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Z", ref Rect.Z);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/W", ref Rect.W);
+            _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/H", ref Rect.H);
 
-            if (CHelper.GetValueFromXML(item + "/Color", navigator, ref _Theme.ColorName, String.Empty))
+            if (xmlReader.GetValue(item + "/Color", ref _Theme.ColorName, String.Empty))
             {
-                _ThemeLoaded &= _Base.Theme.GetColor(_Theme.ColorName, SkinIndex, ref Color);
+                _ThemeLoaded &= CBase.Theme.GetColor(_Theme.ColorName, SkinIndex, ref Color);
             }
             else
             {
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/R", navigator, ref Color.R);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/G", navigator, ref Color.G);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/B", navigator, ref Color.B);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/A", navigator, ref Color.A);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/R", ref Color.R);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/G", ref Color.G);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/B", ref Color.B);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/A", ref Color.A);
             }
 
-            if (CHelper.GetValueFromXML(item + "/SColor", navigator, ref _Theme.SColorName, String.Empty))
+            if (xmlReader.GetValue(item + "/SColor", ref _Theme.SColorName, String.Empty))
             {
-                _ThemeLoaded &= _Base.Theme.GetColor(_Theme.SColorName, SkinIndex, ref SColor);
+                _ThemeLoaded &= CBase.Theme.GetColor(_Theme.SColorName, SkinIndex, ref SColor);
             }
             else
             {
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/SR", navigator, ref SColor.R);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/SG", navigator, ref SColor.G);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/SB", navigator, ref SColor.B);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/SA", navigator, ref SColor.A);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/SR", ref SColor.R);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/SG", ref SColor.G);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/SB", ref SColor.B);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/SA", ref SColor.A);
             }
 
-            _ThemeLoaded &= Text.LoadTheme(item, "Text", navigator, SkinIndex, true);
+            _ThemeLoaded &= Text.LoadTheme(item, "Text", xmlReader, SkinIndex, true);
             Text.Z = Rect.Z;
-            if (CHelper.ItemExistsInXML(item + "/SText", navigator))
+            if (xmlReader.ItemExists(item + "/SText"))
             {
                 SelText = true;
-                _ThemeLoaded &= SText.LoadTheme(item, "SText", navigator, SkinIndex, true);
+                _ThemeLoaded &= SText.LoadTheme(item, "SText", xmlReader, SkinIndex, true);
                 SText.Z = Rect.Z;
             }
             
             
             //Reflections
-            if (CHelper.ItemExistsInXML(item + "/Reflection", navigator))
+            if (xmlReader.ItemExists(item + "/Reflection"))
             {
                 Reflection = true;
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Reflection/Space", navigator, ref ReflectionSpace);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/Reflection/Height", navigator, ref ReflectionHeight);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Reflection/Space", ref ReflectionSpace);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/Reflection/Height", ref ReflectionHeight);
             }
             else
                 Reflection = false;
 
-            if (CHelper.ItemExistsInXML(item + "/SReflection", navigator))
+            if (xmlReader.ItemExists(item + "/SReflection"))
             {
                 SReflection = true;
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/SReflection/Space", navigator, ref SReflectionSpace);
-                _ThemeLoaded &= CHelper.TryGetFloatValueFromXML(item + "/SReflection/Height", navigator, ref SReflectionHeight);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/SReflection/Space", ref SReflectionSpace);
+                _ThemeLoaded &= xmlReader.TryGetFloatValue(item + "/SReflection/Height", ref SReflectionHeight);
             }
             else
                 SReflection = false;
@@ -302,7 +298,7 @@ namespace Vocaluxe.Menu
 
         public void Draw(bool ForceDraw)
         {
-            if (!Visible && _Base.Settings.GetGameState() != EGameState.EditTheme && !ForceDraw)
+            if (!Visible && CBase.Settings.GetGameState() != EGameState.EditTheme && !ForceDraw)
                 return;
 
             STexture texture = new STexture(-1);
@@ -312,13 +308,13 @@ namespace Vocaluxe.Menu
                 if (Texture.index != -1)
                     texture = Texture;
                 else
-                    texture = _Base.Theme.GetSkinTexture(_Theme.TextureName, _PartyModeID);
+                    texture = CBase.Theme.GetSkinTexture(_Theme.TextureName, _PartyModeID);
 
-                _Base.Drawing.DrawTexture(texture, Rect, Color);
+                CBase.Drawing.DrawTexture(texture, Rect, Color);
                 
                 if (Reflection)
                 {
-                    _Base.Drawing.DrawTextureReflection(texture, Rect, Color, Rect, ReflectionSpace, ReflectionHeight);
+                    CBase.Drawing.DrawTextureReflection(texture, Rect, Color, Rect, ReflectionSpace, ReflectionHeight);
                     Text.DrawRelative(Rect.X, Rect.Y, ReflectionSpace, ReflectionHeight, Rect.H);
                 }
                 else
@@ -329,13 +325,13 @@ namespace Vocaluxe.Menu
                 if (Texture.index != -1)
                     texture = Texture;
                 else
-                    texture = _Base.Theme.GetSkinTexture(_Theme.STextureName, _PartyModeID);
+                    texture = CBase.Theme.GetSkinTexture(_Theme.STextureName, _PartyModeID);
 
-                _Base.Drawing.DrawTexture(texture, Rect, SColor);
+                CBase.Drawing.DrawTexture(texture, Rect, SColor);
 
                 if (Reflection)
                 {
-                    _Base.Drawing.DrawTextureReflection(texture, Rect, SColor, Rect, ReflectionSpace, ReflectionHeight);
+                    CBase.Drawing.DrawTextureReflection(texture, Rect, SColor, Rect, ReflectionSpace, ReflectionHeight);
                     Text.DrawRelative(Rect.X, Rect.Y, ReflectionSpace, ReflectionHeight, Rect.H);
                 }
                 else
@@ -346,13 +342,13 @@ namespace Vocaluxe.Menu
                 if (STexture.index != -1)
                     texture = STexture;
                 else
-                    texture = _Base.Theme.GetSkinTexture(_Theme.STextureName, _PartyModeID);
+                    texture = CBase.Theme.GetSkinTexture(_Theme.STextureName, _PartyModeID);
 
-                _Base.Drawing.DrawTexture(texture, Rect, SColor);
+                CBase.Drawing.DrawTexture(texture, Rect, SColor);
 
                 if (Reflection)
                 {
-                    _Base.Drawing.DrawTextureReflection(texture, Rect, SColor, Rect, ReflectionSpace, ReflectionHeight);
+                    CBase.Drawing.DrawTextureReflection(texture, Rect, SColor, Rect, ReflectionSpace, ReflectionHeight);
                     SText.DrawRelative(Rect.X, Rect.Y, ReflectionSpace, ReflectionHeight, Rect.H);
                 }
                 else
@@ -375,10 +371,10 @@ namespace Vocaluxe.Menu
             Text.LoadTextures();
 
             if (_Theme.ColorName != String.Empty)
-                Color = _Base.Theme.GetColor(_Theme.ColorName, _PartyModeID);
+                Color = CBase.Theme.GetColor(_Theme.ColorName, _PartyModeID);
 
             if (_Theme.SColorName != String.Empty)
-                SColor = _Base.Theme.GetColor(_Theme.SColorName, _PartyModeID);
+                SColor = CBase.Theme.GetColor(_Theme.SColorName, _PartyModeID);
         }
 
         public void ReloadTextures()

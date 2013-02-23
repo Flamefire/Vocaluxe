@@ -32,9 +32,11 @@ namespace Vocaluxe.Base
         public static IInputs Input = new BInputs();
         public static IPlaylist Playlist = new BPlaylist();
 
-
-        public static Basic Base = new Basic(
-            Config, Settings, Theme, Helper, Log, BackgroundMusic, Draw, Graphics, Fonts, Language, Game, Profiles, Record, Songs, Video, Sound, Cover, DataBase, Input, Playlist);
+        public static void Init()
+        {
+            CBase.Assign(Config, Settings, Theme, Helper, Log, BackgroundMusic, Draw, Graphics, Fonts, Language,
+                Game, Profiles, Record, Songs, Video, Sound, Cover, DataBase, Input, Playlist);
+        }
     }
 
     class BConfig : IConfig
@@ -607,15 +609,20 @@ namespace Vocaluxe.Base
                 return null;
 
             CSong song = CSongs.VisibleSongs[VisibleIndex];
-            if (song == null)
-                return null;
+            //Flamefire: Why copy the song-instance??? Cover and stuff will be loaded twice!
+            //And for unknown reason causes no-big-cover bug if covers are not loaded on startup
+            return song;
+            //if (song == null)
+            //    return null;
 
-            return new CSong(song);
+            //return new CSong(song);
         }
 
         public CSong GetSongByID(int SongID)
         {
-            return new CSong(CSongs.GetSong(SongID));
+            //Flamefire: Why copy?
+            //return new CSong(CSongs.GetSong(SongID));
+            return CSongs.GetSong(SongID);
         }
 
         public CSong[] GetSongs()

@@ -251,14 +251,14 @@ namespace Vocaluxe.Base
             for (int i = 0; i < _Screens.Count; i++)
             {
                 CLog.StartBenchmark(1, "Load Theme " + Enum.GetNames(typeof(EScreens))[i]);
-                _Screens[i].Initialize(CMain.Base);
+                _Screens[i].Initialize();
                 _Screens[i].LoadTheme(CTheme.GetThemeScreensPath(-1));
                 CLog.StopBenchmark(1, "Load Theme " + Enum.GetNames(typeof(EScreens))[i]);
             }
 
             for (int i = 0; i < _PopupScreens.Count; i++)
 			{
-                _PopupScreens[i].Initialize(CMain.Base);
+                _PopupScreens[i].Initialize();
                 _PopupScreens[i].LoadTheme(CTheme.GetThemeScreensPath(-1));
 			}
         }
@@ -324,7 +324,7 @@ namespace Vocaluxe.Base
             CInput.Update();
 
             if (CConfig.CoverLoading == ECoverLoading.TR_CONFIG_COVERLOADING_DYNAMIC && _CurrentScreen != EScreens.ScreenSing)
-                CSongs.LoadCover(30L, 1);
+                CSongs.LoadCover();
 
             if (CSettings.GameState != EGameState.EditTheme)
             {
@@ -503,7 +503,8 @@ namespace Vocaluxe.Base
             MouseEvent InputMouseEvent = new MouseEvent();
 
             bool PopupPlayerControlAllowed = _CurrentScreen != EScreens.ScreenOptionsRecord && _CurrentScreen != EScreens.ScreenSing &&
-                _CurrentScreen != EScreens.ScreenSong && _CurrentScreen != EScreens.ScreenCredits && !CBackgroundMusic.Disabled;
+                (_CurrentScreen != EScreens.ScreenSong || (_CurrentScreen == EScreens.ScreenSong && CSongs.Category == -1 && CConfig.Tabs ==EOffOn.TR_CONFIG_ON)) 
+                && _CurrentScreen != EScreens.ScreenCredits && !CBackgroundMusic.Disabled;
 
             bool PopupVolumeControlAllowed = _CurrentScreen != EScreens.ScreenCredits && _CurrentScreen != EScreens.ScreenOptionsRecord;
 
@@ -560,7 +561,10 @@ namespace Vocaluxe.Base
                                     _Screens[(int)_CurrentScreen].ApplyVolume();
                                 }
                                 else
+                                {
                                     CConfig.BackgroundMusicVolume += Diff;
+                                    CBackgroundMusic.ApplyVolume();
+                                }
                                 break;
 
                             case EScreens.ScreenSing:

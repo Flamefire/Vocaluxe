@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Xml;
-using System.Xml.XPath;
 
 namespace Vocaluxe.Menu
 {
@@ -31,7 +30,6 @@ namespace Vocaluxe.Menu
     public class CBackground : IMenuElement
     {
         private int _PartyModeID;
-        private Basic _Base;
         private SThemeBackground _Theme;
         private bool _ThemeLoaded;
                        
@@ -43,10 +41,9 @@ namespace Vocaluxe.Menu
         }
 
         #region Constructors
-        public CBackground(Basic Base, int PartyModeID)
+        public CBackground(int PartyModeID)
         {
             _PartyModeID = PartyModeID;
-            _Base = Base;
             _ThemeLoaded = false;
             _Theme = new SThemeBackground();
             
@@ -55,28 +52,28 @@ namespace Vocaluxe.Menu
         #endregion Constructors
 
         #region public
-        public bool LoadTheme(string XmlPath, string ElementName, XPathNavigator navigator, int SkinIndex)
+        public bool LoadTheme(string XmlPath, string ElementName, CXMLReader xmlReader, int SkinIndex)
         {
             string item = XmlPath + "/" + ElementName;
             _ThemeLoaded = true;
 
-            _ThemeLoaded &= CHelper.TryGetEnumValueFromXML<EBackgroundTypes>(item + "/Type", navigator, ref _Theme.Type);
+            _ThemeLoaded &= xmlReader.TryGetEnumValue<EBackgroundTypes>(item + "/Type", ref _Theme.Type);
             
-            bool vid = CHelper.GetValueFromXML(item + "/Video", navigator, ref _Theme.VideoName, String.Empty);
-            bool tex = CHelper.GetValueFromXML(item + "/Skin", navigator, ref _Theme.TextureName, String.Empty);
+            bool vid = xmlReader.GetValue(item + "/Video", ref _Theme.VideoName, String.Empty);
+            bool tex = xmlReader.GetValue(item + "/Skin", ref _Theme.TextureName, String.Empty);
             _ThemeLoaded &= vid || tex || _Theme.Type == EBackgroundTypes.None;
                 
-            if (CHelper.GetValueFromXML(item + "/Color", navigator, ref _Theme.ColorName, String.Empty))
+            if (xmlReader.GetValue(item + "/Color", ref _Theme.ColorName, String.Empty))
             {
-                _ThemeLoaded &= _Base.Theme.GetColor(_Theme.ColorName, SkinIndex, ref Color);
+                _ThemeLoaded &= CBase.Theme.GetColor(_Theme.ColorName, SkinIndex, ref Color);
             }
             else
             {
                 bool success = true;
-                success &= CHelper.TryGetFloatValueFromXML(item + "/R", navigator, ref Color.R);
-                success &= CHelper.TryGetFloatValueFromXML(item + "/G", navigator, ref Color.G);
-                success &= CHelper.TryGetFloatValueFromXML(item + "/B", navigator, ref Color.B);
-                success &= CHelper.TryGetFloatValueFromXML(item + "/A", navigator, ref Color.A);
+                success &= xmlReader.TryGetFloatValue(item + "/R", ref Color.R);
+                success &= xmlReader.TryGetFloatValue(item + "/G", ref Color.G);
+                success &= xmlReader.TryGetFloatValue(item + "/B", ref Color.B);
+                success &= xmlReader.TryGetFloatValue(item + "/A", ref Color.A);
 
                 if (_Theme.Type != EBackgroundTypes.None)
                     _ThemeLoaded &= success;
@@ -130,27 +127,27 @@ namespace Vocaluxe.Menu
 
         public void Resume()
         {
-            if (_Theme.Type == EBackgroundTypes.Video && _Theme.VideoName != String.Empty && _Base.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_ON)
-                _Base.Theme.SkinVideoResume(_Theme.VideoName, _PartyModeID);
+            if (_Theme.Type == EBackgroundTypes.Video && _Theme.VideoName != String.Empty && CBase.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_ON)
+                CBase.Theme.SkinVideoResume(_Theme.VideoName, _PartyModeID);
         }
 
         public void Pause()
         {
             if (_Theme.VideoName != String.Empty)
-                _Base.Theme.SkinVideoPause(_Theme.VideoName, _PartyModeID);
+                CBase.Theme.SkinVideoPause(_Theme.VideoName, _PartyModeID);
         }
 
         public bool Draw()
         {
             bool ok = false;
-            if (_Theme.Type == EBackgroundTypes.Video && _Base.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_ON &&
-                _Base.Config.GetVideosToBackground() == EOffOn.TR_CONFIG_ON && _Base.BackgroundMusic.IsPlaying() && _Base.BackgroundMusic.SongHasVideo() &&
-                _Base.BackgroundMusic.VideoEnabled() && !_Base.BackgroundMusic.IsDisabled())
+            if (_Theme.Type == EBackgroundTypes.Video && CBase.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_ON &&
+                CBase.Config.GetVideosToBackground() == EOffOn.TR_CONFIG_ON && CBase.BackgroundMusic.IsPlaying() && CBase.BackgroundMusic.SongHasVideo() &&
+                CBase.BackgroundMusic.VideoEnabled() && !CBase.BackgroundMusic.IsDisabled())
             {
                 Pause();
                 ok = DrawBackgroundMusicVideo();
             }
-            else if (_Theme.Type == EBackgroundTypes.Video && _Base.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_ON)
+            else if (_Theme.Type == EBackgroundTypes.Video && CBase.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_ON)
             {
                 Resume();
                 ok = DrawVideo();
@@ -158,11 +155,11 @@ namespace Vocaluxe.Menu
 
             if (_Theme.TextureName != String.Empty &&
                 (_Theme.Type == EBackgroundTypes.Texture ||
-                (_Theme.Type == EBackgroundTypes.Video && (_Base.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_OFF || !ok))))
+                (_Theme.Type == EBackgroundTypes.Video && (CBase.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_OFF || !ok))))
                 ok = DrawTexture();
             
             if (_Theme.Type == EBackgroundTypes.Color || _Theme.Type == EBackgroundTypes.Texture && !ok ||
-                (_Theme.Type == EBackgroundTypes.Video && _Base.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_OFF && !ok))
+                (_Theme.Type == EBackgroundTypes.Video && CBase.Config.GetVideoBackgrounds() == EOffOn.TR_CONFIG_OFF && !ok))
                 DrawColor();
             
             return true;
@@ -175,7 +172,7 @@ namespace Vocaluxe.Menu
         public void LoadTextures()
         {
             if (_Theme.ColorName != String.Empty)
-                Color = _Base.Theme.GetColor(_Theme.ColorName, _PartyModeID);
+                Color = CBase.Theme.GetColor(_Theme.ColorName, _PartyModeID);
         }
 
         public void ReloadTextures()
@@ -188,21 +185,21 @@ namespace Vocaluxe.Menu
         #region internal
         private void DrawColor()
         {
-            SRectF bounds = new SRectF(0f, 0f, _Base.Settings.GetRenderW(), _Base.Settings.GetRenderH(), _Base.Settings.GetZFar()/4);
+            SRectF bounds = new SRectF(0f, 0f, CBase.Settings.GetRenderW(), CBase.Settings.GetRenderH(), CBase.Settings.GetZFar()/4);
 
-            _Base.Drawing.DrawColor(Color, bounds);
+            CBase.Drawing.DrawColor(Color, bounds);
         }
 
         private bool DrawTexture()
         {
-            STexture Texture = _Base.Theme.GetSkinTexture(_Theme.TextureName, _PartyModeID);
+            STexture Texture = CBase.Theme.GetSkinTexture(_Theme.TextureName, _PartyModeID);
             if (Texture.height > 0)
             {
-                RectangleF bounds = new RectangleF(0f, 0f, _Base.Settings.GetRenderW(), _Base.Settings.GetRenderH());
+                RectangleF bounds = new RectangleF(0f, 0f, CBase.Settings.GetRenderW(), CBase.Settings.GetRenderH());
                 RectangleF rect = new RectangleF(0f, 0f, Texture.width, Texture.height);
                 CHelper.SetRect(bounds, ref rect, rect.Width / rect.Height, EAspect.Crop);
 
-                _Base.Drawing.DrawTexture(Texture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, _Base.Settings.GetZFar() / 4));
+                CBase.Drawing.DrawTexture(Texture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, CBase.Settings.GetZFar() / 4));
                 return true;
             }
             return false;
@@ -210,14 +207,14 @@ namespace Vocaluxe.Menu
 
         private bool DrawVideo()
         {
-            STexture VideoTexture = _Base.Theme.GetSkinVideoTexture(_Theme.VideoName, _PartyModeID);
+            STexture VideoTexture = CBase.Theme.GetSkinVideoTexture(_Theme.VideoName, _PartyModeID);
             if (VideoTexture.height > 0)
             {
-                RectangleF bounds = new RectangleF(0f, 0f, _Base.Settings.GetRenderW(), _Base.Settings.GetRenderH());
+                RectangleF bounds = new RectangleF(0f, 0f, CBase.Settings.GetRenderW(), CBase.Settings.GetRenderH());
                 RectangleF rect = new RectangleF(0f, 0f, VideoTexture.width, VideoTexture.height);
                 CHelper.SetRect(bounds, ref rect, rect.Width / rect.Height, EAspect.Crop);
 
-                _Base.Drawing.DrawTexture(VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, _Base.Settings.GetZFar() / 4));
+                CBase.Drawing.DrawTexture(VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, CBase.Settings.GetZFar() / 4));
                 return true;
             }
             return false;
@@ -225,14 +222,14 @@ namespace Vocaluxe.Menu
 
         private bool DrawBackgroundMusicVideo()
         {
-            STexture VideoTexture = _Base.BackgroundMusic.GetVideoTexture();
+            STexture VideoTexture = CBase.BackgroundMusic.GetVideoTexture();
             if (VideoTexture.height > 0)
             {
-                RectangleF bounds = new RectangleF(0f, 0f, _Base.Settings.GetRenderW(), _Base.Settings.GetRenderH());
+                RectangleF bounds = new RectangleF(0f, 0f, CBase.Settings.GetRenderW(), CBase.Settings.GetRenderH());
                 RectangleF rect = new RectangleF(0f, 0f, VideoTexture.width, VideoTexture.height);
                 CHelper.SetRect(bounds, ref rect, rect.Width / rect.Height, EAspect.Crop);
 
-                _Base.Drawing.DrawTexture(VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, _Base.Settings.GetZFar() / 4));
+                CBase.Drawing.DrawTexture(VideoTexture, new SRectF(rect.X, rect.Y, rect.Width, rect.Height, CBase.Settings.GetZFar() / 4));
                 return true;
             }
             return false;

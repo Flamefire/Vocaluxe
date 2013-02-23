@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Xml;
-using System.Xml.XPath;
 
 namespace Vocaluxe.Menu
 {
@@ -25,7 +24,6 @@ namespace Vocaluxe.Menu
     public class CScreenSetting : IMenuElement
     {
         private int _PartyModeID;
-        private Basic _Base;
 
         private SScreenSetting _Theme;
         private bool _ThemeLoaded;
@@ -35,10 +33,9 @@ namespace Vocaluxe.Menu
             return _Theme.Name;
         }
 
-        public CScreenSetting(Basic Base, int PartyModeID)
+        public CScreenSetting(int PartyModeID)
         {
             _PartyModeID = PartyModeID;
-            _Base = Base;
             _Theme = new SScreenSetting();
             _ThemeLoaded = false;
         }
@@ -46,18 +43,17 @@ namespace Vocaluxe.Menu
         public CScreenSetting(CScreenSetting ts)
         {
             _PartyModeID = ts._PartyModeID;
-            _Base = ts._Base;
             _Theme = ts._Theme;
             _ThemeLoaded = ts._ThemeLoaded;
         }
 
-        public bool LoadTheme(string XmlPath, string ElementName, XPathNavigator navigator, int SkinIndex)
+        public bool LoadTheme(string XmlPath, string ElementName, CXMLReader xmlReader, int SkinIndex)
         {
             string item = XmlPath + "/" + ElementName;
             _ThemeLoaded = true;
 
-            _ThemeLoaded &= CHelper.GetValueFromXML(item + "/Value", navigator, ref _Theme.Value, String.Empty);
-            _ThemeLoaded &= CHelper.TryGetEnumValueFromXML<ESettingType>(item + "/Type", navigator, ref _Theme.Type);
+            _ThemeLoaded &= xmlReader.GetValue(item + "/Value", ref _Theme.Value, String.Empty);
+            _ThemeLoaded &= xmlReader.TryGetEnumValue<ESettingType>(item + "/Type", ref _Theme.Type);
 
             if (_ThemeLoaded)
             {
@@ -129,12 +125,12 @@ namespace Vocaluxe.Menu
 
         private STexture GetTextureValue(string _string)
         {
-            return _Base.Theme.GetSkinTexture(_string, _PartyModeID);
+            return CBase.Theme.GetSkinTexture(_string, _PartyModeID);
         }
 
         private SColorF GetColorValue(string _string)
         {
-            return _Base.Theme.GetColor(_string, _PartyModeID);
+            return CBase.Theme.GetColor(_string, _PartyModeID);
         }
         #endregion Private
 
