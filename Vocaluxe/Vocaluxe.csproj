@@ -222,6 +222,7 @@
     <Compile Include="Lib\Database\CCoverDB.cs" />
     <Compile Include="Lib\Database\CDatabaseBase.cs" />
     <Compile Include="Lib\Database\CHighscoreDB.cs" />
+    <Compile Include="Lib\Database\CImageDB.cs" />
     <Compile Include="Lib\Database\CResourceDB.cs" />
     <Compile Include="Lib\Sound\Playback\CAudioStreamBase.cs" />
     <Compile Include="Lib\Sound\Playback\CPlaybackBase.cs" />
@@ -296,9 +297,7 @@
     <Compile Include="GameModes\IGameMode.cs" />
     <Compile Include="SongQueue\ISongQueue.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Lib\Draw\CDirect3D.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Lib\Draw\CDirect3D.cs" />
     <Compile Include="Lib\Draw\CDrawWinForm.cs">
       <SubType>Form</SubType>
     </Compile>

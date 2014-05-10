@@ -203,6 +203,9 @@ namespace Vocaluxe.Lib.Database
 
         private bool _CreateCoverDB()
         {
+            if (_Connection == null)
+                return false;
+
             try
             {
                 using (var command = new SQLiteCommand(_Connection))

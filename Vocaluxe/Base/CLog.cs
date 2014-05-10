@@ -159,6 +159,11 @@ namespace Vocaluxe.Base
             if (exit)
                 Environment.Exit(Environment.ExitCode);
         }
+
+        public static void LogError(string errorText, Exception e)
+        {
+            LogError(errorText, false, false, e);
+        }
         #endregion LogError
 
         public static void LogDebug(string text)

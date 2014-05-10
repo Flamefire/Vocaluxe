@@ -236,8 +236,7 @@ namespace Vocaluxe.Lib.Database
                                           "Path TEXT NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL);";
                     command.ExecuteNonQuery();
 
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS ImageData ( id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                                          "ImageID INTEGER NOT NULL, Data BLOB NOT NULL);";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS ImageData (ImageID INTEGER NOT NULL, Data BLOB NOT NULL);";
                     command.ExecuteNonQuery();
                 }
             }
